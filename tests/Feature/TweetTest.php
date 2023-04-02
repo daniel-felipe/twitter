@@ -21,11 +21,24 @@ it('should be able to create a tweet', function () {
 
     expect(Tweet::first())
         ->body->toBe('This is my first tweet')
-        
+
         ->created_by->toBe($user->id);
 });
 
-todo('should make sure that only authenticated user users can tweet');
+it('should make sure that only authenticated user users can tweet', function () {
+    livewire(Create::class)
+        ->set('body', 'This is my first tweet')
+        ->call('tweet')
+        ->assertForbidden();
+
+    actingAs(User::factory()->create());
+
+    livewire(Create::class)
+        ->set('body', 'This is my first tweet')
+        ->call('tweet')
+        ->assertEmitted('tweet::created');
+});
+
 todo('body is required');
 todo('the tweet body should have a max length of 140 characters');
 todo('sould show the tweet on the timeline');
